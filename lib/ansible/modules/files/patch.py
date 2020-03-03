@@ -140,8 +140,7 @@ def is_already_applied(patch_func, patch_file, basedir, dest_file=None, binary=F
 
 def apply_patch(patch_func, patch_file, basedir, dest_file=None, binary=False, strip=0, dry_run=False, backup=False, state='present'):
     opts = ['--quiet', '--forward', '--batch', '--reject-file=-',
-            "--strip=%s" % strip, "--directory='%s'" % basedir,
-            "--input='%s'" % patch_file]
+            "--directory='%s'" % basedir, "--input='%s'" % patch_file]
     if dry_run:
         add_dry_run_option(opts)
     if binary:
@@ -152,6 +151,8 @@ def apply_patch(patch_func, patch_file, basedir, dest_file=None, binary=False, s
         opts.append('--backup --version-control=numbered')
     if state == 'absent':
         opts.append('--reverse')
+    if strip is not None:
+        opts.append('--strip=%s' % strip)
 
     (rc, out, err) = patch_func(opts)
     if rc != 0:
@@ -165,7 +166,7 @@ def main():
             src=dict(type='path', required=True, aliases=['patchfile']),
             dest=dict(type='path', aliases=['originalfile']),
             basedir=dict(type='path'),
-            strip=dict(type='int', default=0),
+            strip=dict(type='int', default=None),
             remote_src=dict(type='bool', default=False),
             # NB: for 'backup' parameter, semantics is slightly different from standard
             #     since patch will create numbered copies, not strftime("%Y-%m-%d@%H:%M:%S~")
@@ -189,6 +190,15 @@ def main():
     if p.basedir and not os.path.exists(p.basedir):
         module.fail_json(msg="basedir %s doesn't exist" % (p.basedir))
 
+    # if no_strip:
+    #   if p.strip != 0:
+    #     print("you cannot specify both 'strip' and 'no_strip'")
+    #   p.strip = None
+
+    # if p.strip is None:
+    #   display.deprecation("strip=0 will no longer be passed to patch by default", "2.14")
+
+    print('strip >>>>', p.strip)
     if not p.basedir:
         p.basedir = os.path.dirname(p.dest)
 

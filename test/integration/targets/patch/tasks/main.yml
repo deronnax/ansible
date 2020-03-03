@@ -105,3 +105,11 @@
     dest: "{{ output_dir }}/patch/workfile.txt"
   register: result
   failed_when: result is changed
+
+- name: verify blah
+  copy:
+    src: "./origin.txt"
+    dest: "{{ output_dir }}/patch/workfile.txt"
+  register: result
+  failed_when: result is changed
+
